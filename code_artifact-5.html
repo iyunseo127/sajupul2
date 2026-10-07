@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="ko" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 사주 분석 - 프리미엄 동서양 운세 & MBTI 리포트</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mystic: {
+                            950: '#09070f',
+                            900: '#120e22',
+                            800: '#1e1838',
+                            700: '#2f2752',
+                            600: '#463a75',
+                            gold: '#e0b354',
+                            goldHover: '#c99c3c',
+                            goldLight: '#fbe8bd',
+                            emerald: '#10b981',
+                            cyan: '#06b6d4',
+                            rose: '#f43f5e'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['"Noto Serif KR"', 'serif'],
+                        sans: ['Pretendard', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #09070f;
+            color: #f3f4f6;
+            font-family: 'Pretendard', sans-serif;
+            background-image: 
+                radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.18) 0%, transparent 50%),
+                radial-gradient(circle at 100% 60%, rgba(224, 179, 84, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 0% 80%, rgba(6, 182, 212, 0.06) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+        .gold-gradient-text {
+            background: linear-gradient(135deg, #fff7d6 0%, #e0b354 50%, #a37519 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .mystic-card {
+            background: rgba(18, 14, 34, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(224, 179, 84, 0.2);
+            box-shadow: 0 15px 35px -10px rgba(0, 0, 0, 0.6);
+        }
+        .section-card {
+            background: rgba(30, 24, 56, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s ease;
+        }
+        .section-card:hover {
+            border-color: rgba(224, 179, 84, 0.4);
+            transform: translateY(-2px);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #09070f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(224, 179, 84, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(224, 179, 84, 0.6);
+        }
+        /* Form controls custom styling */
+        select, input[type="text"], input[type="password"] {
+            background-color: rgba(9, 7, 15, 0.7) !important;
+        }
+        /* Printable style */
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            header, footer, #sajuForm, #apiSection, .no-print { display: none !important; }
+            #resultSection { display: block !important; }
+            .section-card { border: 1px solid #ddd !important; background: #fff !important; color: #111 !important; page-break-inside: avoid; }
+            .gold-gradient-text { -webkit-text-fill-color: #926100 !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between py-8 px-4 sm:px-6 lg:px-8">
+
+    <!-- Header -->
+    <header class="text-center mb-10 max-w-4xl mx-auto">
+        <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-mystic-800/80 border border-mystic-gold/30 mb-4 shadow-sm">
+            <span class="w-2 h-2 rounded-full bg-mystic-gold animate-ping"></span>
+            <span class="text-mystic-gold text-xs font-medium tracking-widest uppercase">명리학과 현대 심리학의 조화</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black font-serif gold-gradient-text tracking-tight mb-4">
+            나의 사주 분석
+        </h1>
+        <p class="text-gray-300 text-base sm:text-lg max-w-2xl mx-auto font-light leading-relaxed">
+            타고난 사주팔자(四柱八字)의 오행 기운과 서양의 MBTI 심층 유형을 결합하여<br class="hidden sm:inline">
+            당신의 성격, 운명의 흐름, 그리고 성장 솔루션을 명쾌하게 읽어드립니다.
+        </p>
+    </header>
+
+    <main class="max-w-4xl mx-auto w-full space-y-8 flex-grow">
+
+        <!-- API Key Config Section -->
+        <section id="apiSection" class="mystic-card rounded-2xl p-5 sm:p-6 border-l-4 border-l-mystic-gold transition duration-300">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center space-x-3.5">
+                    <div class="p-3 rounded-xl bg-mystic-gold/15 text-mystic-gold shrink-0">
+                        <i class="fa-solid fa-key text-lg"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            Gemini API 키 연동
+                            <span id="keySavedBadge" class="hidden text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/30">설정 완료</span>
+                        </h2>
+                        <p class="text-xs text-gray-400">심층 분석을 수행하기 위해 개인 API 키를 입력해주세요.</p>
+                    </div>
+                </div>
+                <button id="openApiGuideBtn" type="button" class="inline-flex items-center text-xs text-mystic-gold hover:text-mystic-goldLight transition self-start sm:self-auto font-medium">
+                    <i class="fa-regular fa-circle-question mr-1.5"></i> API 키 발급 가이드
+                </button>
+            </div>
+
+            <div class="mt-4 flex flex-col sm:flex-row gap-2.5">
+                <div class="relative flex-grow">
+                    <input type="password" id="apiKeyInput" placeholder="Google Gemini API 키 (AIzaSy...)" 
+                        class="w-full border border-mystic-600/80 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-mystic-gold transition pl-10">
+                    <i class="fa-solid fa-lock absolute left-3.5 top-3.5 text-gray-500 text-xs"></i>
+                </div>
+                <button id="saveApiKeyBtn" type="button" class="bg-mystic-700 hover:bg-mystic-600 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition duration-200 flex items-center justify-center shrink-0 border border-mystic-600">
+                    <i class="fa-solid fa-check mr-2 text-mystic-gold"></i> 키 저장
+                </button>
+            </div>
+            <p id="apiKeyStatus" class="mt-2 text-xs font-medium hidden"></p>
+        </section>
+
+        <!-- User Input Form -->
+        <section class="mystic-card rounded-2xl p-6 sm:p-8">
+            <div class="flex items-center justify-between pb-4 mb-6 border-b border-mystic-gold/20">
+                <h2 class="text-xl font-bold font-serif text-mystic-gold flex items-center">
+                    <i class="fa-solid fa-compass mr-2.5 text-lg"></i> 분석 대상자 정보 입력
+                </h2>
+                <span class="text-xs text-gray-400"><span class="text-mystic-rose">*</span> 필수 입력 항목</span>
+            </div>
+
+            <form id="sajuForm" class="space-y-6">
+                <!-- 이름 및 성별 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">이름 또는 닉네임</label>
+                        <input type="text" id="userName" placeholder="예: 홍길동" 
+                            class="w-full border border-mystic-600/80 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-mystic-gold transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">성별 <span class="text-mystic-rose">*</span></label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <label class="flex items-center justify-center p-3 border border-mystic-600/80 rounded-xl cursor-pointer hover:border-mystic-gold/50 transition has-[:checked]:border-mystic-gold has-[:checked]:bg-mystic-gold/10">
+                                <input type="radio" name="gender" value="남성" checked class="hidden">
+                                <span class="text-sm font-medium text-gray-200"><i class="fa-solid fa-mars mr-1.5 text-blue-400"></i>남성</span>
+                            </label>
+                            <label class="flex items-center justify-center p-3 border border-mystic-600/80 rounded-xl cursor-pointer hover:border-mystic-gold/50 transition has-[:checked]:border-mystic-gold has-[:checked]:bg-mystic-gold/10">
+                                <input type="radio" name="gender" value="여성" class="hidden">
+                                <span class="text-sm font-medium text-gray-200"><i class="fa-solid fa-venus mr-1.5 text-pink-400"></i>여성</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 생년월일 -->
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">출생 연도 <span class="text-mystic-rose">*</span></label>
+                        <select id="birthYear" class="w-full border border-mystic-600/80 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-mystic-gold transition"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">월 <span class="text-mystic-rose">*</span></label>
+                        <select id="birthMonth" class="w-full border border-mystic-600/80 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-mystic-gold transition"></select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">일 <span class="text-mystic-rose">*</span></label>
+                        <select id="birthDay" class="w-full border border-mystic-600/80 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-mystic-gold transition"></select>
+                    </div>
+                </div>
+
+                <!-- 음양력 & 태어난 시간 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">양력 / 음력 구분 <span class="text-mystic-rose">*</span></label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="flex items-center justify-center p-2.5 border border-mystic-600/80 rounded-xl cursor-pointer hover:border-mystic-gold/50 transition has-[:checked]:border-mystic-gold has-[:checked]:bg-mystic-gold/10">
+                                <input type="radio" name="calendarType" value="양력" checked class="hidden">
+                                <span class="text-xs text-gray-200">양력</span>
+                            </label>
+                            <label class="flex items-center justify-center p-2.5 border border-mystic-600/80 rounded-xl cursor-pointer hover:border-mystic-gold/50 transition has-[:checked]:border-mystic-gold has-[:checked]:bg-mystic-gold/10">
+                                <input type="radio" name="calendarType" value="음력(평달)" class="hidden">
+                                <span class="text-xs text-gray-200">음력(평달)</span>
+                            </label>
+                            <label class="flex items-center justify-center p-2.5 border border-mystic-600/80 rounded-xl cursor-pointer hover:border-mystic-gold/50 transition has-[:checked]:border-mystic-gold has-[:checked]:bg-mystic-gold/10">
+                                <input type="radio" name="calendarType" value="음력(윤달)" class="hidden">
+                                <span class="text-xs text-gray-200">음력(윤달)</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">태어난 시각 (시주)</label>
+                        <select id="birthTime" class="w-full border border-mystic-600/80 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-mystic-gold transition">
+                            <option value="태어난 시간 모름">시간 모름 (삼주 분석)</option>
+                            <option value="자시 (23:30 ~ 01:29)">자시 (子) 23:30 ~ 01:29</option>
+                            <option value="축시 (01:30 ~ 03:29)">축시 (丑) 01:30 ~ 03:29</option>
+                            <option value="인시 (03:30 ~ 05:29)">인시 (寅) 03:30 ~ 05:29</option>
+                            <option value="묘시 (05:30 ~ 07:29)">묘시 (卯) 05:30 ~ 07:29</option>
+                            <option value="진시 (07:30 ~ 09:29)">진시 (辰) 07:30 ~ 09:29</option>
+                            <option value="사시 (09:30 ~ 11:29)">사시 (巳) 09:30 ~ 11:29</option>
+                            <option value="오시 (11:30 ~ 13:29)">오시 (午) 11:30 ~ 13:29</option>
+                            <option value="미시 (13:30 ~ 15:29)">미시 (未) 13:30 ~ 15:29</option>
+                            <option value="신시 (15:30 ~ 17:29)">신시 (申) 15:30 ~ 17:29</option>
+                            <option value="유시 (17:30 ~ 19:29)">유시 (酉) 17:30 ~ 19:29</option>
+                            <option value="술시 (19:30 ~ 21:29)">술시 (戌) 19:30 ~ 21:29</option>
+                            <option value="해시 (21:30 ~ 23:29)">해시 (亥) 21:30 ~ 23:29</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- MBTI & 관심 분야 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">MBTI 성격 유형 <span class="text-mystic-rose">*</span></label>
+                        <select id="mbtiType" class="w-full border border-mystic-600/80 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-mystic-gold transition font-medium">
+                            <option value="INFJ">INFJ - 선의의 옹호자</option>
+                            <option value="INFP">INFP - 열정적인 중재자</option>
+                            <option value="ENFJ">ENFJ - 정의로운 사회운동가</option>
+                            <option value="ENFP">ENFP - 재기발랄한 활동가</option>
+                            <option value="INTJ">INTJ - 용의주도한 전략가</option>
+                            <option value="INTP">INTP - 논리적인 사색가</option>
+                            <option value="ENTJ">ENTJ - 대담한 통솔자</option>
+                            <option value="ENTP">ENTP - 뜨거운 논쟁을 즐기는 변론가</option>
+                            <option value="ISFJ">ISFJ - 용감한 수호자</option>
+                            <option value="ISTJ">ISTJ - 청렴결백한 논리주의자</option>
+                            <option value="ESFJ">ESFJ - 사교적인 외교관</option>
+                            <option value="ESTJ">ESTJ - 엄격한 관리자</option>
+                            <option value="ISFP">ISFP - 호기심 많은 예술가</option>
+                            <option value="ISTP">ISTP - 만능 재주꾼</option>
+                            <option value="ESFP">ESFP - 자유로운 영혼의 연예인</option>
+                            <option value="ESTP">ESTP - 모험을 즐기는 사업가</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">가장 집중해서 볼 테마</label>
+                        <select id="concernTopic" class="w-full border border-mystic-600/80 rounded-xl px-3 py-3 text-sm text-white focus:outline-none focus:border-mystic-gold transition">
+                            <option value="전반적인 타고난 성향과 종합 운세">☯ 타고난 성향 및 종합 운세</option>
+                            <option value="재물운, 커리어 발전 및 사업/직업 운">💰 재물운 & 커리어/직업 성공</option>
+                            <option value="연애운, 이상형 및 연인/인간관계 궁합">💖 연애/결혼운 & 인간관계</option>
+                            <option value="현재 및 앞으로의 운세 흐름과 삶의 개운법">🔮 향후 운세 흐름 & 개운 솔루션</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 제출 버튼 -->
+                <div class="pt-2">
+                    <button type="submit" id="analyzeBtn" class="w-full bg-gradient-to-r from-mystic-gold via-amber-500 to-mystic-goldHover hover:brightness-110 text-mystic-950 font-bold py-4 px-6 rounded-xl text-base shadow-lg transition duration-300 flex items-center justify-center space-x-2 cursor-pointer">
+                        <i class="fa-solid fa-sparkles text-lg"></i>
+                        <span>나의 사주 + MBTI 심층 분석 시작하기</span>
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="hidden mystic-card rounded-2xl p-10 text-center my-8 relative overflow-hidden">
+            <div class="inline-block relative w-24 h-24 mb-6">
+                <div class="absolute top-0 left-0 w-full h-full border-4 border-mystic-gold/20 rounded-full"></div>
+                <div class="absolute top-0 left-0 w-full h-full border-4 border-mystic-gold rounded-full animate-spin border-t-transparent"></div>
+                <div class="absolute inset-0 flex items-center justify-center text-mystic-gold">
+                    <i class="fa-solid fa-yin-yang text-3xl animate-pulse"></i>
+                </div>
+            </div>
+            <h3 class="text-2xl font-bold font-serif text-mystic-gold mb-3">운명의 지도를 분석하고 있습니다</h3>
+            <p class="text-sm text-gray-300 max-w-md mx-auto leading-relaxed animate-pulse">
+                Gemini AI가 명리학의 오행 상생상극과 서양 MBTI의 성격 구조를 대입하여 심층 리포트를 생성 중입니다...
+            </p>
+        </div>
+
+        <!-- Result Display Section -->
+        <section id="resultSection" class="hidden space-y-6">
+            <!-- Result Header Card -->
+            <div class="mystic-card rounded-2xl p-6 sm:p-8 relative overflow-hidden border-t-4 border-t-mystic-gold">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-700/60">
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-mystic-gold/20 text-mystic-gold border border-mystic-gold/40">
+                                AI 융합 운명 분석 리포트
+                            </span>
+                            <span id="badgeMbti" class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-mystic-cyan/20 text-mystic-cyan border border-mystic-cyan/40">
+                                MBTI
+                            </span>
+                        </div>
+                        <h2 class="text-2xl sm:text-3xl font-bold font-serif gold-gradient-text" id="resultTitle">
+                            사주 분석 결과
+                        </h2>
+                    </div>
+
+                    <div class="flex items-center space-x-2 no-print self-end sm:self-auto">
+                        <button id="printBtn" class="text-xs bg-mystic-800 hover:bg-mystic-700 text-gray-200 border border-mystic-600 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-print text-mystic-gold"></i>
+                            <span>인쇄 / PDF</span>
+                        </button>
+                        <button id="copyResultBtn" class="text-xs bg-mystic-800 hover:bg-mystic-700 text-gray-200 border border-mystic-600 px-3.5 py-2 rounded-xl transition flex items-center gap-1.5">
+                            <i class="fa-regular fa-copy text-mystic-gold"></i>
+                            <span>결과 복사</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Structured Cards Render Target -->
+                <div id="structuredResultContainer" class="mt-6 space-y-6"></div>
+
+                <div class="mt-8 pt-4 border-t border-gray-800/80 text-center text-xs text-gray-500">
+                    <p><i class="fa-solid fa-shield-halved mr-1"></i> 본 분석 리포트는 전통 명리학과 현대 심리학 이론을 바탕으로 AI가 생성한 조언입니다.</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-12 text-center text-xs text-gray-500 py-4 no-print">
+        <p>© 나의 사주 분석 - AI Oriental Fortune & MBTI Analysis</p>
+    </footer>
+
+    <!-- API Key Guide Modal -->
+    <div id="apiModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden no-print">
+        <div class="mystic-card rounded-2xl max-w-lg w-full p-6 sm:p-8 relative max-h-[90vh] overflow-y-auto">
+            <button id="closeApiModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            
+            <h3 class="text-xl font-bold font-serif text-mystic-gold mb-4 flex items-center">
+                <i class="fa-solid fa-key mr-2"></i> Gemini API 키 무료 발급 방법
+            </h3>
+            
+            <ol class="space-y-4 text-sm text-gray-300 list-decimal list-inside leading-relaxed">
+                <li class="pl-1">
+                    <strong class="text-white">Google AI Studio 로그인:</strong><br>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-mystic-gold underline font-mono text-xs hover:text-yellow-300 inline-block mt-1">https://aistudio.google.com/app/apikey</a>
+                </li>
+                <li class="pl-1">
+                    <strong class="text-white">API 키 생성:</strong><br>
+                    파란색 <span class="bg-mystic-700 text-white px-2 py-0.5 rounded text-xs border border-mystic-600">"Create API Key"</span> 버튼을 클릭합니다.
+                </li>
+                <li class="pl-1">
+                    <strong class="text-white">키 복사 및 입력:</strong><br>
+                    생성된 API 키(<code>AIzaSy...</code>)를 복사하여 상단 입력창에 저장하세요.
+                </li>
+            </ol>
+
+            <div class="mt-6 bg-mystic-900/90 p-4 rounded-xl border border-mystic-gold/20 text-xs text-gray-400">
+                <p><i class="fa-solid fa-lock text-mystic-gold mr-1"></i> 사용자의 API 키는 서버에 저장되지 않고 오직 개인 브라우저 내부(LocalStorage)에만 안전하게 유지됩니다.</p>
+            </div>
+
+            <button id="confirmModalBtn" class="mt-6 w-full bg-mystic-gold hover:bg-mystic-goldHover text-mystic-950 font-bold py-3 rounded-xl transition">
+                확인했습니다
+            </button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- DOM Elements ---
+            const apiKeyInput = document.getElementById('apiKeyInput');
+            const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+            const apiKeyStatus = document.getElementById('apiKeyStatus');
+            const keySavedBadge = document.getElementById('keySavedBadge');
+            const openApiGuideBtn = document.getElementById('openApiGuideBtn');
+            const closeApiModalBtn = document.getElementById('closeApiModalBtn');
+            const confirmModalBtn = document.getElementById('confirmModalBtn');
+            const apiModal = document.getElementById('apiModal');
+
+            const birthYearSelect = document.getElementById('birthYear');
+            const birthMonthSelect = document.getElementById('birthMonth');
+            const birthDaySelect = document.getElementById('birthDay');
+            const sajuForm = document.getElementById('sajuForm');
+
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const resultSection = document.getElementById('resultSection');
+            const structuredResultContainer = document.getElementById('structuredResultContainer');
+            const resultTitle = document.getElementById('resultTitle');
+            const badgeMbti = document.getElementById('badgeMbti');
+            const copyResultBtn = document.getElementById('copyResultBtn');
+            const printBtn = document.getElementById('printBtn');
+
+            // Raw response storage for clipboard copy
+            let rawMarkdownResponse = "";
+
+            // --- Init Date Selects ---
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear; y >= 1930; y--) {
+                const opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = `${y}년`;
+                if (y === 1996) opt.selected = true;
+                birthYearSelect.appendChild(opt);
+            }
+
+            for (let m = 1; m <= 12; m++) {
+                const opt = document.createElement('option');
+                opt.value = m;
+                opt.textContent = `${m}월`;
+                if (m === 1) opt.selected = true;
+                birthMonthSelect.appendChild(opt);
+            }
+
+            function updateDays() {
+                const year = parseInt(birthYearSelect.value);
+                const month = parseInt(birthMonthSelect.value);
+                const daysInMonth = new Date(year, month, 0).getDate();
+                const currentSelectedDay = parseInt(birthDaySelect.value) || 1;
+
+                birthDaySelect.innerHTML = '';
+                for (let d = 1; d <= daysInMonth; d++) {
+                    const opt = document.createElement('option');
+                    opt.value = d;
+                    opt.textContent = `${d}일`;
+                    if (d === currentSelectedDay || (d === daysInMonth && currentSelectedDay > daysInMonth)) {
+                        opt.selected = true;
+                    }
+                    birthDaySelect.appendChild(opt);
+                }
+            }
+
+            birthYearSelect.addEventListener('change', updateDays);
+            birthMonthSelect.addEventListener('change', updateDays);
+            updateDays();
+
+            // --- LocalStorage API Key Management ---
+            const SAVED_KEY_NAME = 'gemini_saju_api_key';
+            const loadApiKey = () => {
+                const savedKey = localStorage.getItem(SAVED_KEY_NAME);
+                if (savedKey) {
+                    apiKeyInput.value = savedKey;
+                    keySavedBadge.classList.remove('hidden');
+                    showApiKeyStatus('저장된 API 키가 불러와졌습니다.', 'success');
+                }
+            };
+
+            const showApiKeyStatus = (msg, type) => {
+                apiKeyStatus.textContent = msg;
+                apiKeyStatus.classList.remove('hidden', 'text-emerald-400', 'text-rose-400');
+                if (type === 'success') {
+                    apiKeyStatus.classList.add('text-emerald-400');
+                } else {
+                    apiKeyStatus.classList.add('text-rose-400');
+                }
+            };
+
+            saveApiKeyBtn.addEventListener('click', () => {
+                const key = apiKeyInput.value.trim();
+                if (!key) {
+                    showApiKeyStatus('API 키를 입력해주세요.', 'error');
+                    keySavedBadge.classList.add('hidden');
+                    return;
+                }
+                localStorage.setItem(SAVED_KEY_NAME, key);
+                keySavedBadge.classList.remove('hidden');
+                showApiKeyStatus('API 키가 성공적으로 저장되었습니다!', 'success');
+            });
+
+            loadApiKey();
+
+            // --- Modal Controls ---
+            openApiGuideBtn.addEventListener('click', () => apiModal.classList.remove('hidden'));
+            closeApiModalBtn.addEventListener('click', () => apiModal.classList.add('hidden'));
+            confirmModalBtn.addEventListener('click', () => apiModal.classList.add('hidden'));
+
+            sajuForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const apiKey = apiKeyInput.value.trim() || localStorage.getItem(SAVED_KEY_NAME);
+                if (!apiKey) {
+                    alert('Gemini API 키를 먼저 입력하고 저장해주세요.');
+                    apiKeyInput.focus();
+                    return;
+                }
+
+                // Gather inputs
+                const userName = document.getElementById('userName').value.trim() || '사용자';
+                const gender = document.querySelector('input[name="gender"]:checked').value;
+                const birthYear = birthYearSelect.value;
+                const birthMonth = birthMonthSelect.value;
+                const birthDay = birthDaySelect.value;
+                const calendarType = document.querySelector('input[name="calendarType"]:checked').value;
+                const birthTime = document.getElementById('birthTime').value;
+                const mbti = document.getElementById('mbtiType').value;
+                const concern = document.getElementById('concernTopic').value;
+
+                // UI loading state
+                resultSection.classList.add('hidden');
+                loadingIndicator.classList.remove('hidden');
+                loadingIndicator.scrollIntoView({ behavior: 'smooth' });
+
+                // Prompts
+                const systemPrompt = `당신은 최고 권위의 사주명리학자이자 심리학자입니다.
+반드시 아래 지정된 [5가지 섹션 목차]를 정확히 ### (제목) 형식으로 포함하여 답변해 주세요.
+
+### 1. ☯ 사주 오행 및 타고난 기운 분석
+### 2. 🧩 MBTI(${mbti})와 사주 오행의 심층 결합
+### 3. 💖 연애 · 결혼 및 인간관계 운
+### 4. 💰 재물 · 직업 및 성공 커리어 운
+### 5. 🔮 ${concern} 맞춤 솔루션 & 행운의 팁
+
+각 섹션 내용은 가독성이 극대화되도록 문단 간격을 충분히 두고, 주요 핵심 용어나 키워드는 **강조**를 사용하세요. 정중하고 깊이 있는 어조로 작성해 주세요.`;
+
+                const userPrompt = `다음 사용자의 정보를 바탕으로 5가지 구조화된 섹션 리포트를 작성해주세요.
+
+[프로필]
+- 이름: ${userName}
+- 성별: ${gender}
+- 생년월일: ${birthYear}년 ${birthMonth}월 ${birthDay}일 (${calendarType})
+- 출생 시각: ${birthTime}
+- MBTI 유형: ${mbti}
+- 주요 관심 분야: ${concern}`;
+
+                try {
+                    const responseText = await callGeminiApi(apiKey, systemPrompt, userPrompt);
+                    rawMarkdownResponse = responseText;
+
+                    // Set header info
+                    resultTitle.textContent = `${userName}님의 사주 & MBTI 리포트`;
+                    badgeMbti.textContent = `MBTI: ${mbti}`;
+
+                    // Render structured sections
+                    renderStructuredResult(responseText);
+
+                    loadingIndicator.classList.add('hidden');
+                    resultSection.classList.remove('hidden');
+                    resultSection.scrollIntoView({ behavior: 'smooth' });
+
+                } catch (err) {
+                    console.error(err);
+                    loadingIndicator.classList.add('hidden');
+                    alert(`분석 진행 중 오류가 발생했습니다: ${err.message}\nAPI 키 상태를 확인해주세요.`);
+                }
+            });
+
+            async function callGeminiApi(apiKey, systemPrompt, userPrompt) {
+                const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ parts: [{ text: userPrompt }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] }
+                };
+
+                let retries = 0;
+                const maxRetries = 3;
+                let delay = 1000;
+
+                while (retries <= maxRetries) {
+                    try {
+                        const res = await fetch(endpoint, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (res.status === 429 && retries < maxRetries) {
+                            await new Promise(r => setTimeout(r, delay));
+                            delay *= 2;
+                            retries++;
+                            continue;
+                        }
+
+                        if (!res.ok) {
+                            const errData = await res.json().catch(() => ({}));
+                            throw new Error(errData.error?.message || `HTTP ${res.status} 오류가 발생했습니다.`);
+                        }
+
+                        const data = await res.json();
+                        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                        if (!text) throw new Error('응답 데이터를 불러오지 못했습니다.');
+                        return text;
+
+                    } catch (error) {
+                        if (retries >= maxRetries) throw error;
+                        await new Promise(r => setTimeout(r, delay));
+                        delay *= 2;
+                        retries++;
+                    }
+                }
+            }
+
+            function renderStructuredResult(markdownText) {
+                structuredResultContainer.innerHTML = '';
+
+                // Split markdown by ### sections
+                const rawSections = markdownText.split(/(?=###\s+)/g);
+
+                const sectionIcons = [
+                    { icon: 'fa-yin-yang', color: 'text-mystic-gold', border: 'border-l-mystic-gold' },
+                    { icon: 'fa-puzzle-piece', color: 'text-mystic-cyan', border: 'border-l-mystic-cyan' },
+                    { icon: 'fa-heart', color: 'text-mystic-rose', border: 'border-l-mystic-rose' },
+                    { icon: 'fa-coins', color: 'text-emerald-400', border: 'border-l-emerald-400' },
+                    { icon: 'fa-wand-magic-sparkles', color: 'text-amber-300', border: 'border-l-amber-300' }
+                ];
+
+                let iconIdx = 0;
+
+                rawSections.forEach((secStr) => {
+                    if (!secStr.trim()) return;
+
+                    const lines = secStr.trim().split('\n');
+                    let title = lines[0].replace(/^###\s+/, '').trim();
+                    const bodyMarkdown = lines.slice(1).join('\n').trim();
+
+                    const currentStyle = sectionIcons[iconIdx % sectionIcons.length];
+                    iconIdx++;
+
+                    // Section Card Element
+                    const cardElem = document.createElement('div');
+                    cardElem.className = `section-card rounded-xl p-5 sm:p-7 border-l-4 ${currentStyle.border} shadow-md`;
+
+                    // Parsed HTML from Markdown
+                    const parsedHtml = marked.parse(bodyMarkdown);
+
+                    cardElem.innerHTML = `
+                        <div class="flex items-center space-x-3 mb-4 pb-3 border-b border-gray-700/50">
+                            <span class="p-2 rounded-lg bg-mystic-900 ${currentStyle.color}">
+                                <i class="fa-solid ${currentStyle.icon} text-lg"></i>
+                            </span>
+                            <h3 class="text-lg sm:text-xl font-bold font-serif text-white tracking-wide">
+                                ${title}
+                            </h3>
+                        </div>
+                        <div class="prose prose-invert max-w-none text-gray-200 text-sm sm:text-base leading-relaxed space-y-3 font-normal">
+                            ${parsedHtml}
+                        </div>
+                    `;
+
+                    structuredResultContainer.appendChild(cardElem);
+                });
+
+                // Style enhancements inside parsed HTML
+                structuredResultContainer.querySelectorAll('strong').forEach(el => {
+                    el.className = 'text-mystic-goldLight font-semibold px-1 py-0.5 rounded bg-mystic-gold/10';
+                });
+                structuredResultContainer.querySelectorAll('ul').forEach(el => {
+                    el.className = 'list-disc pl-5 space-y-2 my-3 text-gray-300';
+                });
+                structuredResultContainer.querySelectorAll('p').forEach(el => {
+                    el.className = 'mb-3 leading-relaxed';
+                });
+            }
+
+            copyResultBtn.addEventListener('click', () => {
+                if (!rawMarkdownResponse) return;
+                const textarea = document.createElement('textarea');
+                textarea.value = rawMarkdownResponse;
+                document.body.appendChild(textarea);
+                textarea.select();
+                try {
+                    document.execCommand('copy');
+                    const origHtml = copyResultBtn.innerHTML;
+                    copyResultBtn.innerHTML = `<i class="fa-solid fa-check text-emerald-400"></i> 복사 완료!`;
+                    setTimeout(() => { copyResultBtn.innerHTML = origHtml; }, 2000);
+                } catch (e) {
+                    alert('복사에 실패했습니다.');
+                }
+                document.body.removeChild(textarea);
+            });
+
+            printBtn.addEventListener('click', () => {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>
